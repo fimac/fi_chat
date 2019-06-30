@@ -21,18 +21,50 @@ socket.connect();
 
 // initialize an object named presences
 let presences = {};
+const typingTimeout = 2000;
+var typingTimer;
+let userTyping = false;
+let messageInput = document.getElementById("NewMessage");
+
 // formatTimestamp turns our server generated timestamp into a human readable format.
 let formatTimestamp = timestamp => {
   let date = new Date(timestamp);
   return date.toLocaleTimeString();
 };
+
+messageInput.addEventListener("keydown", () => {
+  userStartsTyping();
+  clearTimeout(typingTimer);
+});
+
+messageInput.addEventListener("keyup", () => {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(userStopsTyping, typingTimeout);
+});
+
+const userStartsTyping = () => {
+  if (userTyping) {
+    return;
+  }
+
+  userTyping = true;
+  room.push("user:typing", { typing: true });
+};
+
+const userStopsTyping = () => {
+  clearTimeout(typingTimer);
+  userTyping = false;
+  room.push("user:typing", { typing: false });
+};
+
 // Presence.list - a given user can have multiple presences (Phoenix sends as metas)
 // For example they might be online from a browser as well as a mobile device.
 // listBy function, returns a JavaScript object witht he users name and when they were first detected online.
 let listBy = (user, { metas: metas }) => {
   return {
     user: user,
-    onlineAt: formatTimestamp(metas[0].online_at)
+    onlineAt: formatTimestamp(metas[0].online_at),
+    userTyping: userTyping
   };
 };
 
@@ -47,6 +79,7 @@ let render = presences => {
         ${presence.user}
         <br>
         <small>online since ${presence.onlineAt}</small>
+        <small>${presence.userTyping ? "typing...." : ""}</small>
       </li>
     `
     )
@@ -74,11 +107,13 @@ let render = presences => {
 let room = socket.channel("room:lobby");
 room.on("presence_state", state => {
   presences = Presence.syncState(presences, state);
+  console.log(presences, "@@@@@@@");
   render(presences);
 });
 
 room.on("presence_diff", diff => {
   presences = Presence.syncDiff(presences, diff);
+  console.log(presences, "!!!!!!");
   render(presences);
 });
 
@@ -86,7 +121,6 @@ room.join();
 
 // // Here we are wiring up the input which has an id of NewMessage, to list for Enter (keyCode 13)
 // // and use room.push() to send whatever the users typed to the server.
-let messageInput = document.getElementById("NewMessage");
 messageInput.addEventListener("keypress", e => {
   if (e.keyCode == 13 && messageInput.value != "") {
     room.push("message:new", messageInput.value);

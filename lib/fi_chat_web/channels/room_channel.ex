@@ -38,4 +38,19 @@ defmodule FiChatWeb.RoomChannel do
 
     {:noreply, socket}
   end
+
+  def handle_in("user:typing", %{"typing" => typing}, socket) do
+    user = socket.assigns.user
+    IO.inspect(user, label: "user")
+
+    {:ok, x} =
+      Presence.update(socket, "#{user}", %{
+        userTyping: typing,
+        user: user
+      })
+
+    IO.inspect(x, label: "********")
+
+    {:reply, :ok, socket}
+  end
 end
