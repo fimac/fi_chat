@@ -17,3 +17,8 @@ config :fi_chat, FiChat.Repo,
   password: "postgres",
   database: "fi_chat_prod",
   pool_size: 10
+
+config :fi_chat, Hello.Repo,
+  ssl: true,
+  url: database_url,
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")

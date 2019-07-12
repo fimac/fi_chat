@@ -2,7 +2,7 @@ defmodule FiChatWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :fi_chat
 
   socket "/socket", FiChatWeb.UserSocket,
-    websocket: true,
+    websocket: [timeout: 45_000],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
