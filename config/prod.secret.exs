@@ -16,4 +16,4 @@ config :fi_chat, FiChat.Repo,
   username: "postgres",
   password: "postgres",
   database: "fi_chat_prod",
-  pool_size: 15
+  pool_size: 10
