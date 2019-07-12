@@ -21,7 +21,7 @@ socket.connect();
 
 // initialize an object named presences
 let presences = {};
-const typingTimeout = 2000;
+const typingTimeout = 1000;
 var typingTimer;
 let userTyping = false;
 let messageInput = document.getElementById("NewMessage");
@@ -46,15 +46,14 @@ const userStartsTyping = () => {
   if (userTyping) {
     return;
   }
-
   userTyping = true;
-  room.push("user:typing", { typing: true });
+  room.push("user:typing", { typing: true, user: user });
 };
 
 const userStopsTyping = () => {
   clearTimeout(typingTimer);
   userTyping = false;
-  room.push("user:typing", { typing: false });
+  room.push("user:typing", { typing: false, user: user });
 };
 
 // Presence.list - a given user can have multiple presences (Phoenix sends as metas)
@@ -64,7 +63,7 @@ let listBy = (user, { metas: metas }) => {
   return {
     user: user,
     onlineAt: formatTimestamp(metas[0].online_at),
-    userTyping: userTyping
+    userTyping: metas[0].userTyping
   };
 };
 
@@ -78,14 +77,15 @@ let render = presences => {
       <li>
         ${presence.user}
         <br>
-        <small>online since ${presence.onlineAt}</small>
-        <small>${presence.userTyping ? "typing...." : ""}</small>
+        <small>last active at ${presence.onlineAt}</small>
+        <small>${
+          presence.user !== user && presence.userTyping ? "typing...." : ""
+        }</small>
       </li>
     `
     )
     .join("");
 };
-
 // Channels
 
 // Telling javascript that there is a channel called room:lobby and to join it.
@@ -107,13 +107,11 @@ let render = presences => {
 let room = socket.channel("room:lobby");
 room.on("presence_state", state => {
   presences = Presence.syncState(presences, state);
-  console.log(presences, "@@@@@@@");
   render(presences);
 });
 
 room.on("presence_diff", diff => {
   presences = Presence.syncDiff(presences, diff);
-  console.log(presences, "!!!!!!");
   render(presences);
 });
 

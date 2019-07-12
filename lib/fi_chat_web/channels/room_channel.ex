@@ -39,17 +39,12 @@ defmodule FiChatWeb.RoomChannel do
     {:noreply, socket}
   end
 
-  def handle_in("user:typing", %{"typing" => typing}, socket) do
-    user = socket.assigns.user
-    IO.inspect(user, label: "user")
-
-    {:ok, x} =
-      Presence.update(socket, "#{user}", %{
-        userTyping: typing,
-        user: user
-      })
-
-    IO.inspect(x, label: "********")
+  def handle_in("user:typing", %{"typing" => typing, "user" => current_user}, socket) do
+    Presence.update(socket, "#{current_user}", %{
+      userTyping: typing,
+      user: current_user,
+      online_at: :os.system_time(:milli_seconds)
+    })
 
     {:reply, :ok, socket}
   end
