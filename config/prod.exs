@@ -12,10 +12,24 @@ use Mix.Config
 config :fi_chat, FiChatWeb.Endpoint,
   http: [:inet6, port: System.get_env("PORT") || 4000],
   url: [scheme: "https", host: "immense-woodland-97243.herokuapp.com", port: 443],
-  cache_static_manifest: "priv/static/cache_manifest.json"
+  cache_static_manifest: "priv/static/cache_manifest.json",
+  secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE")
 
 # Do not print debug messages in production
 config :logger, level: :info
+
+config :fi_chat, FiChat.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  url: System.get_env("DATABASE_URL"),
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+  ssl: true
+
+# config :mirror, MirrorWeb.Endpoint,
+#   http: [port: System.get_env("PORT")],
+#   url: [scheme: "https", host: "mirror1.herokuapp.com", port: 443],
+#   force_ssl: [rewrite_on: [:x_forwarded_proto]],
+#   cache_static_manifest: "priv/static/cache_manifest.json",
+#   secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE")
 
 # ## SSL Support
 #
