@@ -13,5 +13,5 @@ config :fi_chat, FiChatWeb.Endpoint, secret_key_base: System.get_env("SECRET_KEY
 # Configure your database
 config :fi_chat, FiChat.Repo,
   ssl: true,
-  url: database_url,
+  url: System.get_env("DATABASE_URL"),
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
